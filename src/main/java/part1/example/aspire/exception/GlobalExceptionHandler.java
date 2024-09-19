@@ -19,6 +19,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors,HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(StackOverflowError.class)
+    public ResponseEntity<Map<String,String>> stackOverflowError(StackOverflowError ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+        return new ResponseEntity<>(errors,HttpStatus.CONFLICT);
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String,String>> handleArgumentExceptions(Exception ex){
         Map<String,String> errors = new HashMap<>();

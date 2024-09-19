@@ -1,6 +1,7 @@
 package part1.example.aspire.model;
 
-import jakarta.persistence.Entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,10 +11,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 public class Employee {
-    private int empId;
-    private int managerId;
-    private int accountId;
-    private int streamId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer empId;
     private String empName;
+
+    @ManyToOne
+    @JoinColumn(name = "stream_id")
+    @JsonIgnore
+    private Stream stream;
+
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    @JsonIgnore
+    private Employee manager;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    @JsonIgnore
+    private Account account;
+
     private String designation;
 }

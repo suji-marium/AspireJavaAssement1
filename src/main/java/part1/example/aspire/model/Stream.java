@@ -1,20 +1,28 @@
 package part1.example.aspire.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Entity
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 public class Stream {
     @Id
-    private int streamId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer streamId;
     private String streamName;
-    private String accountId;
-    private String managerId;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    @JsonIgnore
+    private Account account;
+
+    // @OneToMany(mappedBy = "stream")
+    // @JsonIgnore
+    // private List<Employee> employees;
 }
