@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import part1.example.aspire.model.Employee;
 import part1.example.aspire.model.EmployeeDetailsDTO;
 import part1.example.aspire.model.EmployeeResponseGet;
+import part1.example.aspire.model.EmployeeResponseUpdate;
 import part1.example.aspire.model.Stream;
 import part1.example.aspire.model.StreamResponseGet;
 import part1.example.aspire.repository.EmployeeRepository;
@@ -25,8 +26,6 @@ public class AspireService {
     @Autowired
     private StreamRepository streamRepository;
 
-    
-    
     public ResponseEntity<EmployeeResponseGet> getEmployees(String startLetter) {
 
         List<Employee> employees = employeeRepository.findByEmpNameStartingWith(startLetter);
@@ -71,6 +70,11 @@ public class AspireService {
         String responseMessage=streams.isEmpty()? "No stream found" : "Successfully fetched";
         StreamResponseGet streamResponseGet=new StreamResponseGet(responseMessage,streamList);
         return ResponseEntity.ok(streamResponseGet);
+    }
+
+
+    public ResponseEntity<EmployeeResponseUpdate> updateEmployee(Integer empId, Integer managerId) {
+        return null;
     }
 
 

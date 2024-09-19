@@ -3,11 +3,13 @@ package part1.example.aspire.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import part1.example.aspire.model.EmployeeResponseGet;
+import part1.example.aspire.model.EmployeeResponseUpdate;
 import part1.example.aspire.model.StreamResponseGet;
 import part1.example.aspire.service.AspireService;
 
@@ -31,5 +33,12 @@ public class AspireController {
     @GetMapping("/allstreams")
     public ResponseEntity<StreamResponseGet> getStreams(){
         return aspireService.getStream();
+    }
+
+    @PutMapping("/update")
+
+    public ResponseEntity<EmployeeResponseUpdate> updateEmployee(@RequestParam(value = "employeeId") Integer empId,
+    @RequestParam(value = "managerId") Integer managerId) {
+        return aspireService.updateEmployee(empId,managerId);
     }
 }
