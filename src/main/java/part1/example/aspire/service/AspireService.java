@@ -1,10 +1,15 @@
 package part1.example.aspire.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import jakarta.persistence.EntityNotFoundException;
 import part1.example.aspire.model.Employee;
 import part1.example.aspire.model.EmployeeDetailsDTO;
 import part1.example.aspire.model.EmployeeResponseGet;
@@ -62,18 +67,49 @@ public class AspireService {
 
     public ResponseEntity<StreamResponseGet> getStream(){
         List<Stream> streams=streamRepository.findAll();
-
-        List<String> streamList=new ArrayList<>();
+        
+        Set<String> streamSet = new HashSet<>();
         for (Stream stream:streams){
-            streamList.add(stream.getStreamName());
+            streamSet.add(stream.getStreamName());
         }
         String responseMessage=streams.isEmpty()? "No stream found" : "Successfully fetched";
-        StreamResponseGet streamResponseGet=new StreamResponseGet(responseMessage,streamList);
+        StreamResponseGet streamResponseGet=new StreamResponseGet(responseMessage,streamSet);
         return ResponseEntity.ok(streamResponseGet);
     }
 
 
     public ResponseEntity<EmployeeResponseUpdate> updateEmployee(Integer empId, Integer managerId) {
+        Employee employee = employeeRepository.findById(empId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + empId));
+
+        if (managerId==0) {
+            employee.setDesignation("Manager");
+        }
+        else{
+            employee.setDesignation("Associate");
+        }
+
+        if (managerId != null && managerId == 0) {
+            employee.setManager(null); 
+        } else if (managerId != null) {
+            Employee manager = employeeRepository.findById(managerId)
+                    .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + managerId));
+            employee.setManager(manager);
+            employee.setStream(manager.getStream());
+            employee.setAccount(manager.getAccount());
+          
+        }
+
+        employeeRepository.save(employee);
+        String successMessage = employee.getEmpName() + "'s details have been successfully updated.";
+        EmployeeResponseUpdate response = new EmployeeResponseUpdate(successMessage);
+        
+        return ResponseEntity.ok(response);
+            
+        }
+
+
+    public ResponseEntity<EmployeeResponseUpdate> addEmployee(Employee employee) {
         return null;
     }
 

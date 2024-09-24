@@ -1,6 +1,6 @@
 package part1.example.aspire.model;
 
-import java.util.List;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StreamResponseGet {
     private String message;
-    private List<String> streams;
+    private Set<String> streams;
 }

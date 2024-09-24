@@ -8,4 +8,6 @@ import part1.example.aspire.model.Employee;
 
 public interface EmployeeRepository extends JpaRepository<Employee,Integer>{
     List<Employee> findByEmpNameStartingWith(String name);
+
+    
 }
