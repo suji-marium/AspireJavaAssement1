@@ -3,9 +3,11 @@ package part1.example.aspire.service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -78,43 +80,90 @@ public class AspireService {
     }
 
 
-    public ResponseEntity<EmployeeResponseUpdate> updateEmployee(Integer empId, Integer managerId) {
-        Employee employee = employeeRepository.findById(empId)
-            .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + empId));
-
-        if (managerId==0) {
-            employee.setDesignation("Manager");
-        }
-        else{
-            employee.setDesignation("Associate");
-        }
-
-        if (managerId != null && managerId == 0) {
-            employee.setManager(null); 
-        } else if (managerId != null) {
-            Employee manager = employeeRepository.findById(managerId)
-                    .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + managerId));
-            employee.setManager(manager);
-            employee.setStream(manager.getStream());
-            employee.setAccount(manager.getAccount());
-          
-        }
-
-        employeeRepository.save(employee);
-        String successMessage = employee.getEmpName() + "'s details have been successfully updated.";
-        EmployeeResponseUpdate response = new EmployeeResponseUpdate(successMessage);
-        
-        return ResponseEntity.ok(response);
-            
-        }
-
-
     public ResponseEntity<EmployeeResponseUpdate> addEmployee(Employee employee) {
         return null;
     }
 
 
+    public ResponseEntity<EmployeeResponseUpdate> updateEmployeeToManager(Integer empId, Integer streamId) {
+        Optional<Stream> optionalStream = streamRepository.findById(streamId);
+        String designation="Manager";
+        if (optionalStream.isPresent()) {
+            Stream stream = optionalStream.get();
     
+           
+            Optional<Employee> existingManager = employeeRepository.findByStream_StreamIdAndDesignation(streamId,designation);
+            if (existingManager.isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new EmployeeResponseUpdate("Manager already exists for this stream"));
+            }
+    
+            Optional<Employee> optionalEmployee = employeeRepository.findById(empId);
+            if (optionalEmployee.isPresent()) {
+                Employee employee = optionalEmployee.get();
+    
+                if ("manager".equalsIgnoreCase(designation)) {
+                    List<Employee> subordinates = employeeRepository.findByManager(employee);
+                    if (!subordinates.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body(new EmployeeResponseUpdate("The employee ID belongs to a manager with subemployees"));
+                    }
+                }
+                employee.setManager(null);
+    
+               
+                employee.setDesignation(designation);
+                employee.setStream(stream);
+                employee.setAccount(stream.getAccount());
+                System.out.println(stream.getAccount());
+                employeeRepository.save(employee);
+    
+            
+                EmployeeResponseUpdate response = new EmployeeResponseUpdate("Employee updated successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new EmployeeResponseUpdate("Employee not found"));
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new EmployeeResponseUpdate("Stream not found"));
+        }
+    }
+
+
+    public ResponseEntity<EmployeeResponseUpdate> updateManagerToEmployee(Integer empId, Integer managerId) {
+        String designation="Associate";
+        Employee employee = employeeRepository.findById(empId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + empId));
+        
+        if (managerId != null ) {
+            Employee manager = employeeRepository.findById(managerId)
+                    .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + managerId));
+            
+            List<Employee> subordinates = employeeRepository.findByManager(employee);
+
+            if (!subordinates.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new EmployeeResponseUpdate("The employee ID belongs to a manager with subemployees"));
+            }
+
+            if(manager.getManager()!=null){
+                EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("The manager ID doesn't belongs to a manager");
+                return ResponseEntity.badRequest().body(employeeResponseUpdate);
+            }
+
+            employee.setManager(manager);
+            employee.setDesignation(designation);
+            employee.setStream(manager.getStream());
+            employee.setAccount(manager.getAccount());
+        }    
+        employeeRepository.save(employee);
+        String successMessage = employee.getEmpName() + "'s details have been successfully updated.";
+        EmployeeResponseUpdate response = new EmployeeResponseUpdate(successMessage);
+        return ResponseEntity.ok(response); 
+
+    }
 }
 
 

@@ -38,9 +38,16 @@ public class AspireController {
         return aspireService.getStream();
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<EmployeeResponseUpdate> updateEmployee(@RequestParam(value = "employeeId") Integer empId,
-    @RequestParam(value = "managerId") Integer managerId) {
-        return aspireService.updateEmployee(empId,managerId);
+    @PutMapping("/update-to-manager")
+    public ResponseEntity<EmployeeResponseUpdate> updateEmployeeToManager(@RequestParam(value = "employeeId") Integer empId,
+    @RequestParam(value="streamId") Integer streamId) {
+        return aspireService.updateEmployeeToManager(empId,streamId);
     }
+
+    @PutMapping("/update-to-employee")
+    public ResponseEntity<EmployeeResponseUpdate> updateManagerToEmployee(@RequestParam(value = "employeeId") Integer empId,
+    @RequestParam(value="managerId") Integer managerId) {
+        return aspireService.updateManagerToEmployee(empId,managerId);
+    }
+
 }
