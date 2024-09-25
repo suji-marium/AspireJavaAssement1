@@ -90,7 +90,6 @@ public class AspireService {
         String designation="Manager";
         if (optionalStream.isPresent()) {
             Stream stream = optionalStream.get();
-    
            
             Optional<Employee> existingManager = employeeRepository.findByStream_StreamIdAndDesignation(streamId,designation);
             if (existingManager.isPresent()) {
@@ -110,22 +109,22 @@ public class AspireService {
                     }
                 }
                 employee.setManager(null);
-    
-               
                 employee.setDesignation(designation);
                 employee.setStream(stream);
                 employee.setAccount(stream.getAccount());
-                System.out.println(stream.getAccount());
+        
                 employeeRepository.save(employee);
-    
-            
                 EmployeeResponseUpdate response = new EmployeeResponseUpdate("Employee updated successfully");
                 return ResponseEntity.ok(response);
-            } else {
+            } 
+            
+            else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new EmployeeResponseUpdate("Employee not found"));
             }
-        } else {
+        } 
+        
+        else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new EmployeeResponseUpdate("Stream not found"));
         }
@@ -157,7 +156,8 @@ public class AspireService {
             employee.setDesignation(designation);
             employee.setStream(manager.getStream());
             employee.setAccount(manager.getAccount());
-        }    
+        } 
+           
         employeeRepository.save(employee);
         String successMessage = employee.getEmpName() + "'s details have been successfully updated.";
         EmployeeResponseUpdate response = new EmployeeResponseUpdate(successMessage);

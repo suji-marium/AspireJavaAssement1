@@ -1,0 +1,7 @@
+2024-09-25 11:56:35 [http-nio-8080-exec-4] INFO  AspireController:61 - Get-AllStream Query executed in 276ms
+2024-09-25 11:56:54 [http-nio-8080-exec-3] INFO  AspireController:61 - Get-AllStream Query executed in 19ms
+2024-09-25 11:56:59 [http-nio-8080-exec-1] INFO  AspireController:49 - Get-Employee-StartWithLetter Query executed in 50ms
+2024-09-25 11:57:03 [http-nio-8080-exec-10] INFO  AspireController:61 - Get-AllStream Query executed in 17ms
+2024-09-25 11:57:07 [http-nio-8080-exec-6] INFO  AspireController:85 - Update-To-Employee Query executed in 56ms
+2024-09-25 17:16:46 [http-nio-8080-exec-8] INFO  AspireController:73 - Update-To-Manager Query executed in 53ms
+2024-09-25 17:16:50 [http-nio-8080-exec-5] INFO  AspireController:85 - Update-To-Employee Query executed in 17ms
