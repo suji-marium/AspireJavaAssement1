@@ -60,10 +60,16 @@ public class AspireService {
             employeeDetails.add(employeeDetailsDTO);
         }
     
-        String responseMessage = employeeDetails.isEmpty() ? "No employee found" : "Successfully fetched";
-        EmployeeResponseGet employeeResponseGet = new EmployeeResponseGet(responseMessage, employeeDetails);
+        if(employeeDetails.isEmpty()){
+            EmployeeResponseGet employeeResponseGet = new EmployeeResponseGet("No employee found", employeeDetails);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(employeeResponseGet);
+        }
+
+        else{
+            EmployeeResponseGet employeeResponseGet = new EmployeeResponseGet("Successfully fetched", employeeDetails);
+            return ResponseEntity.ok(employeeResponseGet);
+        }
         
-        return ResponseEntity.ok(employeeResponseGet);
     }
 
 
@@ -74,9 +80,16 @@ public class AspireService {
         for (Stream stream:streams){
             streamSet.add(stream.getStreamName());
         }
-        String responseMessage=streams.isEmpty()? "No stream found" : "Successfully fetched";
-        StreamResponseGet streamResponseGet=new StreamResponseGet(responseMessage,streamSet);
-        return ResponseEntity.ok(streamResponseGet);
+
+        if(streams.isEmpty()){
+            StreamResponseGet streamResponseGet=new StreamResponseGet("No stream found" ,streamSet);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(streamResponseGet);
+        }
+        
+        else{
+            StreamResponseGet streamResponseGet=new StreamResponseGet("Successfully fetched" ,streamSet);
+            return ResponseEntity.ok(streamResponseGet);
+        }
     }
 
 
@@ -114,7 +127,7 @@ public class AspireService {
                 employee.setAccount(stream.getAccount());
         
                 employeeRepository.save(employee);
-                EmployeeResponseUpdate response = new EmployeeResponseUpdate("Employee updated successfully");
+                EmployeeResponseUpdate response = new EmployeeResponseUpdate(employee.getEmpName() + "'s details have been successfully updated.");
                 return ResponseEntity.ok(response);
             } 
             
