@@ -15,3 +15,5 @@
 2024-09-30 11:16:02 [http-nio-8080-exec-2] INFO  AspireController:73 - Update-To-Manager Query executed in 549ms
 2024-09-30 11:16:34 [http-nio-8080-exec-3] INFO  AspireController:73 - Update-To-Manager Query executed in 16ms
 2024-09-30 11:25:10 [http-nio-8080-exec-5] INFO  AspireController:49 - Get-Employee-StartWithLetter Query executed in 10ms
+2024-09-30 11:25:37 [http-nio-8080-exec-2] INFO  AspireController:49 - Get-Employee-StartWithLetter Query executed in 305ms
+2024-09-30 11:25:47 [http-nio-8080-exec-3] INFO  AspireController:49 - Get-Employee-StartWithLetter Query executed in 51ms
