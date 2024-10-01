@@ -19,10 +19,4 @@ public class Account {
     private Integer accountId;
     private String accountName;
     
-   
-    // @OneToMany(mappedBy = "account")
-    // @JsonIgnore
-    // private List<Employee> employees;
-
-    
 }

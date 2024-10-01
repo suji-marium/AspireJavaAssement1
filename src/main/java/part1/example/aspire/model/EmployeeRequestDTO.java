@@ -12,9 +12,7 @@ public class EmployeeRequestDTO {
     
     @NotBlank(message = "Employee name is mandatory")
     private String empName;
-
     private Integer streamId;
-
     private Integer managerId;
 
 }
