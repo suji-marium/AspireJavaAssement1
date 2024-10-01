@@ -2,6 +2,8 @@ package part1.example.aspire.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer empId;
+    @NotBlank(message = "Employee name is mandatory")
     private String empName;
 
     @ManyToOne
@@ -31,5 +34,7 @@ public class Employee {
     @JsonIgnore
     private Account account;
 
+    @Pattern(regexp = "Manager|Associate", message = "Invalid designation")
     private String designation;
+
 }

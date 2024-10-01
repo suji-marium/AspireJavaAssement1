@@ -10,4 +10,11 @@ class AspireApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+    public void testMainMethod() {
+        String[] args = {};
+        
+        AspireApplication.main(args);
+        
+    }
 }
