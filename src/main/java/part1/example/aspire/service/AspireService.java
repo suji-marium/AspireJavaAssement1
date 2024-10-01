@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import jakarta.persistence.EntityNotFoundException;
 import part1.example.aspire.model.Employee;
 import part1.example.aspire.model.EmployeeDetailsDTO;
+import part1.example.aspire.model.EmployeeRequestDTO;
 import part1.example.aspire.model.EmployeeResponseGet;
 import part1.example.aspire.model.EmployeeResponseUpdate;
 import part1.example.aspire.model.Stream;
@@ -26,9 +26,6 @@ import part1.example.aspire.repository.StreamRepository;
 public class AspireService {
     @Autowired
     private EmployeeRepository employeeRepository;
-    
-    // @Autowired
-    // private AccountRepository accountRepository;
     
     @Autowired
     private StreamRepository streamRepository;
@@ -93,10 +90,128 @@ public class AspireService {
     }
 
 
-    public ResponseEntity<EmployeeResponseUpdate> addEmployee(Employee employee) {
-        return null;
-    }
+    // public ResponseEntity<EmployeeResponseUpdate> addEmployee(EmployeeRequestDTO employeeRequestDTO) {
+    //     System.out.println(employeeRequestDTO.getManagerId());
+    //     System.out.println(employeeRequestDTO.getStreamId());
+    //     // if(!accountRepository.existsById(employeeRequestDTO.getAccountId())){
+    //     //     EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("Account id not found");
+    //     //     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(employeeResponseUpdate);
+    //     // }
 
+    //     // if(!streamRepository.existsById(employeeRequestDTO.getStreamId())){
+    //     //     EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("Stream id not found");
+    //     //     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(employeeResponseUpdate);
+    //     // }
+
+    //     Employee employee=new Employee();
+    //     employee.setEmpName(employeeRequestDTO.getEmpName());
+
+    //     if(employeeRequestDTO.getManagerId()!=null && employeeRequestDTO.getStreamId()==null){
+    //         employee.setDesignation("Associate");
+
+    //         Optional<Employee> manager=employeeRepository.findById(employeeRequestDTO.getManagerId());
+    //         if(!manager.get().getDesignation().equals("Manager")){
+    //             EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("The manager ID doesn't belongs to a manager");
+    //             return ResponseEntity.badRequest().body(employeeResponseUpdate);
+    //         }
+    //         employee.setStream(manager.get().getStream());
+    //         employee.setAccount(manager.get().getAccount());
+    //         employee.setManager(manager.get());
+    //     }
+       
+    //     else if(employeeRequestDTO.getManagerId()==null && employeeRequestDTO.getStreamId()!=null){
+    //         if(!streamRepository.existsById(employeeRequestDTO.getStreamId())){
+    //             EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("Stream id not found");
+    //             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(employeeResponseUpdate);
+    //         }
+    //         employee.setDesignation("Manager");
+    //         Optional<Employee> existingManager = employeeRepository.findByStream_StreamIdAndDesignation(employeeRequestDTO.getStreamId(),employee.getDesignation());
+    //         if (existingManager.isPresent()) {
+    //             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+    //                     .body(new EmployeeResponseUpdate("Manager already exists for this stream"));
+    //         }
+    //         Optional<Stream> streamOpt=streamRepository.findById(employeeRequestDTO.getStreamId());
+
+    //         employee.setStream(streamOpt.get());
+    //         employee.setAccount(streamOpt.get().getAccount());
+    //         employee.setManager(null);
+    //     }
+
+    //     else {
+    //         EmployeeResponseUpdate responseUpdate = new EmployeeResponseUpdate("Provide streamId to add manager and provide managerId to add employee. Don't provide both");
+    //         return ResponseEntity.badRequest().body(responseUpdate);
+    //     }
+    //     employeeRepository.save(employee);
+    //     EmployeeResponseUpdate responseUpdate = new EmployeeResponseUpdate("Employee added successfully");
+    //     return ResponseEntity.ok(responseUpdate);
+        
+    // }
+
+    public ResponseEntity<EmployeeResponseUpdate> addEmployee(EmployeeRequestDTO employeeRequestDTO) {
+        System.out.println(employeeRequestDTO.getManagerId());
+        System.out.println(employeeRequestDTO.getStreamId());
+        // Check for both IDs
+        if (employeeRequestDTO.getManagerId() != null && employeeRequestDTO.getStreamId() != null) {
+            return ResponseEntity.badRequest()
+                    .body(new EmployeeResponseUpdate("Provide streamId to add manager and provide managerId to add employee. Don't provide both"));
+        }
+    
+        Employee employee = new Employee();
+        employee.setEmpName(employeeRequestDTO.getEmpName());
+    
+        if (employeeRequestDTO.getManagerId() != null) {
+            return handleEmployeeUnderManager(employeeRequestDTO, employee);
+        } else if (employeeRequestDTO.getStreamId() != null) {
+            return handleNewManager(employeeRequestDTO, employee);
+        }
+    
+        return ResponseEntity.badRequest().body(new EmployeeResponseUpdate("No valid manager or stream ID provided."));
+    }
+    
+    private ResponseEntity<EmployeeResponseUpdate> handleEmployeeUnderManager(EmployeeRequestDTO employeeRequestDTO, Employee employee) {
+        employee.setDesignation("Associate");
+    
+        Employee manager = employeeRepository.findById(employeeRequestDTO.getManagerId())
+                .orElseThrow(() -> new EntityNotFoundException("Manager not found"));
+    
+        if (!"Manager".equals(manager.getDesignation())) {
+            return ResponseEntity.badRequest()
+                    .body(new EmployeeResponseUpdate("The manager ID doesn't belong to a manager"));
+        }
+    
+        employee.setStream(manager.getStream());
+        employee.setAccount(manager.getAccount());
+        employee.setManager(manager);
+    
+        employeeRepository.save(employee);
+        return ResponseEntity.ok(new EmployeeResponseUpdate("Employee added successfully"));
+    }
+    
+    private ResponseEntity<EmployeeResponseUpdate> handleNewManager(EmployeeRequestDTO employeeRequestDTO, Employee employee) {
+        if (!streamRepository.existsById(employeeRequestDTO.getStreamId())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new EmployeeResponseUpdate("Stream ID not found"));
+        }
+    
+        employee.setDesignation("Manager");
+        Optional<Employee> existingManager = employeeRepository.findByStream_StreamIdAndDesignation(employeeRequestDTO.getStreamId(), "Manager");
+        
+        if (existingManager.isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new EmployeeResponseUpdate("Manager already exists for this stream"));
+        }
+    
+        Stream stream = streamRepository.findById(employeeRequestDTO.getStreamId())
+                .orElseThrow(() -> new EntityNotFoundException("Stream not found"));
+    
+        employee.setStream(stream);
+        employee.setAccount(stream.getAccount());
+        employee.setManager(null);
+    
+        employeeRepository.save(employee);
+        return ResponseEntity.ok(new EmployeeResponseUpdate("Manager added successfully"));
+    }
+    
 
     public ResponseEntity<EmployeeResponseUpdate> updateEmployeeToManager(Integer empId, Integer streamId) {
         Optional<Stream> optionalStream = streamRepository.findById(streamId);

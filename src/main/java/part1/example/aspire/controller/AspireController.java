@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-
-import part1.example.aspire.model.Employee;
+import jakarta.validation.Valid;
+import part1.example.aspire.model.EmployeeRequestDTO;
 import part1.example.aspire.model.EmployeeResponseGet;
 import part1.example.aspire.model.EmployeeResponseUpdate;
 import part1.example.aspire.model.StreamResponseGet;
@@ -30,10 +29,11 @@ public class AspireController {
     private AspireService aspireService;
 
     @PostMapping("/addEmployee")
-    public ResponseEntity<EmployeeResponseUpdate> addEmployee(@RequestBody Employee employee) {
+    public ResponseEntity<EmployeeResponseUpdate> addEmployee(@Valid @RequestBody EmployeeRequestDTO employeeRequestDTO) {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        ResponseEntity<EmployeeResponseUpdate> employeeResponseUpdate= aspireService.addEmployee(employee);
+        //ResponseEntity<EmployeeResponseUpdate> employeeResponseUpdate= aspireService.addEmployee(employeeRequestDTO);
+        ResponseEntity<EmployeeResponseUpdate> employeeResponseUpdate= aspireService.addEmployee(employeeRequestDTO);        
         stopWatch.stop();
         logger.info("Add-Employee Query executed in " + stopWatch.getTotalTimeMillis() + "ms");
 

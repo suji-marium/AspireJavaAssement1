@@ -3,6 +3,7 @@ package part1.example.aspire.exception;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,4 +35,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors,HttpStatus.BAD_REQUEST);
     }
 
+    // @ExceptionHandler(DataIntegrityViolationException.class)
+    // public ResponseEntity<Map<String,String>> handleDataIntegrityViolationExceptions(DataIntegrityViolationException ex){
+    //     Map<String,String> errors = new HashMap<>();
+    //     errors.put("message", ex.getMessage());
+    //     return new ResponseEntity<>(errors,HttpStatus.BAD_REQUEST);
+    // }
 }

@@ -35,6 +35,97 @@ class AspireServiceTest {
     }
 
     @Test
+    public void testAddEmployee_WithBothManagerIdAndStreamId() {
+        EmployeeRequestDTO requestDTO = new EmployeeRequestDTO();
+        requestDTO.setManagerId(1);
+        requestDTO.setStreamId(2);
+
+        ResponseEntity<EmployeeResponseUpdate> response = aspireService.addEmployee(requestDTO);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Provide streamId to add manager and provide managerId to add employee. Don't provide both", response.getBody().getMessage());
+    }
+
+    @Test
+    public void testAddEmployee_WithValidManagerId() {
+        EmployeeRequestDTO requestDTO = new EmployeeRequestDTO();
+        requestDTO.setManagerId(1);
+
+        Employee manager = new Employee();
+        manager.setDesignation("Manager");
+        when(employeeRepository.findById(1)).thenReturn(Optional.of(manager));
+
+        ResponseEntity<EmployeeResponseUpdate> response = aspireService.addEmployee(requestDTO);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Employee added successfully", response.getBody().getMessage());
+        verify(employeeRepository).save(any(Employee.class)); 
+    }
+
+    @Test
+    public void testAddEmployee_WithInvalidManagerId() {
+        EmployeeRequestDTO requestDTO = new EmployeeRequestDTO();
+        requestDTO.setManagerId(1);
+
+        Employee manager = new Employee();
+        manager.setDesignation("Associate"); // Not a manager
+        when(employeeRepository.findById(1)).thenReturn(Optional.of(manager));
+
+        ResponseEntity<EmployeeResponseUpdate> response = aspireService.addEmployee(requestDTO);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("The manager ID doesn't belong to a manager", response.getBody().getMessage());
+    }
+
+    @Test
+    public void testAddEmployee_WithValidStreamId() {
+        EmployeeRequestDTO requestDTO = new EmployeeRequestDTO();
+        requestDTO.setStreamId(2);
+
+        Stream stream = new Stream();
+        when(streamRepository.existsById(2)).thenReturn(true);
+        when(streamRepository.findById(2)).thenReturn(Optional.of(stream));
+        when(employeeRepository.findByStream_StreamIdAndDesignation(2, "Manager")).thenReturn(Optional.empty());
+
+        ResponseEntity<EmployeeResponseUpdate> response = aspireService.addEmployee(requestDTO);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Manager added successfully", response.getBody().getMessage());
+        verify(employeeRepository).save(any(Employee.class)); // Verify employee was saved
+    }
+
+    @Test
+    public void testAddEmployee_StreamIdNotFound() {
+        EmployeeRequestDTO requestDTO = new EmployeeRequestDTO();
+        requestDTO.setStreamId(2);
+
+        when(streamRepository.existsById(2)).thenReturn(false);
+
+        ResponseEntity<EmployeeResponseUpdate> response = aspireService.addEmployee(requestDTO);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Stream ID not found", response.getBody().getMessage());
+    }
+
+    @Test
+    public void testAddEmployee_ManagerAlreadyExists() {
+        EmployeeRequestDTO requestDTO = new EmployeeRequestDTO();
+        requestDTO.setStreamId(2);
+
+        Stream stream = new Stream();
+        when(streamRepository.existsById(2)).thenReturn(true);
+        when(streamRepository.findById(2)).thenReturn(Optional.of(stream));
+        when(employeeRepository.findByStream_StreamIdAndDesignation(2, "Manager"))
+                .thenReturn(Optional.of(new Employee())); 
+
+        ResponseEntity<EmployeeResponseUpdate> response = aspireService.addEmployee(requestDTO);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Manager already exists for this stream", response.getBody().getMessage());
+    }
+
+
+    @Test
     void testGetEmployees_EmptyList() {
         String startLetter = "A";
         when(employeeRepository.findByEmpNameStartingWith(startLetter)).thenReturn(Collections.emptyList());
@@ -88,14 +179,16 @@ class AspireServiceTest {
     void testUpdateEmployeeToManager_Success() {
         Integer empId = 1;
         Integer streamId = 2;
-
+        String empName="Ramu";
+        
         Stream stream = new Stream();
         stream.setStreamId(streamId);
         stream.setAccount(new Account()); // Assume Account exists
 
         Employee employee = new Employee();
+        employee.setEmpName(empName);
         employee.setEmpId(empId);
-        employee.setDesignation("Developer"); // Not a manager initially
+        employee.setDesignation("Associate"); // Not a manager initially
 
         when(streamRepository.findById(streamId)).thenReturn(Optional.of(stream));
         when(employeeRepository.findByStream_StreamIdAndDesignation(streamId, "Manager")).thenReturn(Optional.empty());
@@ -105,7 +198,7 @@ class AspireServiceTest {
         ResponseEntity<EmployeeResponseUpdate> response = aspireService.updateEmployeeToManager(empId, streamId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Employee updated successfully", response.getBody().getMessage());
+        assertEquals(employee.getEmpName() + "'s details have been successfully updated.", response.getBody().getMessage());
         assertEquals("Manager", employee.getDesignation());
         assertEquals(stream, employee.getStream());
         assertNull(employee.getManager()); // Manager should be set to null
