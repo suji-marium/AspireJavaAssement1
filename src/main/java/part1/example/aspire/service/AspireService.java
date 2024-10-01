@@ -30,10 +30,10 @@ public class AspireService {
     @Autowired
     private StreamRepository streamRepository;
 
+    // Retrieve employee(s) whose name start with the specified start letter
     public ResponseEntity<EmployeeResponseGet> getEmployees(String startLetter) {
 
         List<Employee> employees = employeeRepository.findByEmpNameStartingWith(startLetter);
-
         List<EmployeeDetailsDTO> employeeDetails = new ArrayList<>();
     
         for (Employee employee : employees) {
@@ -69,7 +69,7 @@ public class AspireService {
         
     }
 
-
+    // Retrieve all the streams
     public ResponseEntity<StreamResponseGet> getStream(){
         List<Stream> streams=streamRepository.findAll();
         
@@ -89,67 +89,8 @@ public class AspireService {
         }
     }
 
-
-    // public ResponseEntity<EmployeeResponseUpdate> addEmployee(EmployeeRequestDTO employeeRequestDTO) {
-    //     System.out.println(employeeRequestDTO.getManagerId());
-    //     System.out.println(employeeRequestDTO.getStreamId());
-    //     // if(!accountRepository.existsById(employeeRequestDTO.getAccountId())){
-    //     //     EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("Account id not found");
-    //     //     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(employeeResponseUpdate);
-    //     // }
-
-    //     // if(!streamRepository.existsById(employeeRequestDTO.getStreamId())){
-    //     //     EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("Stream id not found");
-    //     //     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(employeeResponseUpdate);
-    //     // }
-
-    //     Employee employee=new Employee();
-    //     employee.setEmpName(employeeRequestDTO.getEmpName());
-
-    //     if(employeeRequestDTO.getManagerId()!=null && employeeRequestDTO.getStreamId()==null){
-    //         employee.setDesignation("Associate");
-
-    //         Optional<Employee> manager=employeeRepository.findById(employeeRequestDTO.getManagerId());
-    //         if(!manager.get().getDesignation().equals("Manager")){
-    //             EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("The manager ID doesn't belongs to a manager");
-    //             return ResponseEntity.badRequest().body(employeeResponseUpdate);
-    //         }
-    //         employee.setStream(manager.get().getStream());
-    //         employee.setAccount(manager.get().getAccount());
-    //         employee.setManager(manager.get());
-    //     }
-       
-    //     else if(employeeRequestDTO.getManagerId()==null && employeeRequestDTO.getStreamId()!=null){
-    //         if(!streamRepository.existsById(employeeRequestDTO.getStreamId())){
-    //             EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("Stream id not found");
-    //             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(employeeResponseUpdate);
-    //         }
-    //         employee.setDesignation("Manager");
-    //         Optional<Employee> existingManager = employeeRepository.findByStream_StreamIdAndDesignation(employeeRequestDTO.getStreamId(),employee.getDesignation());
-    //         if (existingManager.isPresent()) {
-    //             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-    //                     .body(new EmployeeResponseUpdate("Manager already exists for this stream"));
-    //         }
-    //         Optional<Stream> streamOpt=streamRepository.findById(employeeRequestDTO.getStreamId());
-
-    //         employee.setStream(streamOpt.get());
-    //         employee.setAccount(streamOpt.get().getAccount());
-    //         employee.setManager(null);
-    //     }
-
-    //     else {
-    //         EmployeeResponseUpdate responseUpdate = new EmployeeResponseUpdate("Provide streamId to add manager and provide managerId to add employee. Don't provide both");
-    //         return ResponseEntity.badRequest().body(responseUpdate);
-    //     }
-    //     employeeRepository.save(employee);
-    //     EmployeeResponseUpdate responseUpdate = new EmployeeResponseUpdate("Employee added successfully");
-    //     return ResponseEntity.ok(responseUpdate);
-        
-    // }
-
+    // Add employee
     public ResponseEntity<EmployeeResponseUpdate> addEmployee(EmployeeRequestDTO employeeRequestDTO) {
-        System.out.println(employeeRequestDTO.getManagerId());
-        System.out.println(employeeRequestDTO.getStreamId());
         // Check for both IDs
         if (employeeRequestDTO.getManagerId() != null && employeeRequestDTO.getStreamId() != null) {
             return ResponseEntity.badRequest()
@@ -212,7 +153,7 @@ public class AspireService {
         return ResponseEntity.ok(new EmployeeResponseUpdate("Manager added successfully"));
     }
     
-
+    // Update an employee/manager to a manager
     public ResponseEntity<EmployeeResponseUpdate> updateEmployeeToManager(Integer empId, Integer streamId) {
         Optional<Stream> optionalStream = streamRepository.findById(streamId);
         String designation="Manager";
@@ -228,7 +169,8 @@ public class AspireService {
             Optional<Employee> optionalEmployee = employeeRepository.findById(empId);
             if (optionalEmployee.isPresent()) {
                 Employee employee = optionalEmployee.get();
-    
+                
+                // Check if the empId belongs to a manager
                 if ("manager".equalsIgnoreCase(designation)) {
                     List<Employee> subordinates = employeeRepository.findByManager(employee);
                     if (!subordinates.isEmpty()) {
@@ -258,7 +200,7 @@ public class AspireService {
         }
     }
 
-
+    // Update a manager/employee to an employee
     public ResponseEntity<EmployeeResponseUpdate> updateManagerToEmployee(Integer empId, Integer managerId) {
         String designation="Associate";
         Employee employee = employeeRepository.findById(empId)

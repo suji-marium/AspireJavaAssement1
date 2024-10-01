@@ -22,7 +22,4 @@ public class Stream {
     @JsonIgnore
     private Account account;
 
-    // @OneToMany(mappedBy = "stream")
-    // @JsonIgnore
-    // private List<Employee> employees;
 }

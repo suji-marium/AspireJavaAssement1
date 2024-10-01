@@ -32,7 +32,6 @@ public class AspireController {
     public ResponseEntity<EmployeeResponseUpdate> addEmployee(@Valid @RequestBody EmployeeRequestDTO employeeRequestDTO) {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        //ResponseEntity<EmployeeResponseUpdate> employeeResponseUpdate= aspireService.addEmployee(employeeRequestDTO);
         ResponseEntity<EmployeeResponseUpdate> employeeResponseUpdate= aspireService.addEmployee(employeeRequestDTO);        
         stopWatch.stop();
         logger.info("Add-Employee Query executed in " + stopWatch.getTotalTimeMillis() + "ms");
