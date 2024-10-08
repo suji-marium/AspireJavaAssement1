@@ -16,6 +16,7 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer empId;
+    
     @NotBlank(message = "Employee name is mandatory")
     private String empName;
 

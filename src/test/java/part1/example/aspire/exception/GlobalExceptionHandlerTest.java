@@ -27,12 +27,9 @@ public class GlobalExceptionHandlerTest {
 
     @Test
     public void testHandleArgumentExceptions() {
-        // Mocking BindingResult
-        
         BindingResult bindingResult = mock(BindingResult.class);
         FieldError fieldError = new FieldError("objectName", "fieldName", "Invalid field");
 
-        // Mocking MethodArgumentNotValidException
         MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
         when(ex.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(fieldError));
