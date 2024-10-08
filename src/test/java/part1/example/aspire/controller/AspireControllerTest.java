@@ -32,7 +32,7 @@ public class AspireControllerTest {
 
     @Test
     public void testAddEmployee() {
-        EmployeeRequestDTO requestDTO = new EmployeeRequestDTO(); // Fill in with test data
+        EmployeeRequestDTO requestDTO = new EmployeeRequestDTO();
         requestDTO.setEmpName("Manju Kumar");
         requestDTO.setManagerId(1);
         EmployeeResponseUpdate responseUpdate = new EmployeeResponseUpdate("Employee added successfully"); // Fill in with expected data
