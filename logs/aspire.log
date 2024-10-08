@@ -131,3 +131,12 @@
 2024-10-08 12:32:19 [http-nio-8080-exec-4] INFO  AspireController:37 - Add-Employee Query executed in 4ms
 2024-10-08 12:32:26 [http-nio-8080-exec-6] INFO  AspireController:37 - Add-Employee Query executed in 9ms
 2024-10-08 12:32:43 [http-nio-8080-exec-7] INFO  AspireController:48 - Get-Employee-StartWithLetter Query executed in 15ms
+2024-10-08 14:35:23 [http-nio-8080-exec-1] INFO  AspireController:84 - Update-To-Employee Query executed in 512ms
+2024-10-08 14:38:09 [http-nio-8080-exec-5] INFO  AspireController:72 - Update-To-Manager Query executed in 39ms
+2024-10-08 14:38:15 [http-nio-8080-exec-7] INFO  AspireController:72 - Update-To-Manager Query executed in 50ms
+2024-10-08 14:39:38 [http-nio-8080-exec-10] INFO  AspireController:72 - Update-To-Manager Query executed in 52ms
+2024-10-08 14:39:56 [http-nio-8080-exec-2] INFO  AspireController:72 - Update-To-Manager Query executed in 15ms
+2024-10-08 14:40:06 [http-nio-8080-exec-3] INFO  AspireController:72 - Update-To-Manager Query executed in 10ms
+2024-10-08 14:40:13 [http-nio-8080-exec-4] INFO  AspireController:72 - Update-To-Manager Query executed in 40ms
+2024-10-08 14:40:36 [http-nio-8080-exec-5] INFO  AspireController:72 - Update-To-Manager Query executed in 15ms
+2024-10-08 14:40:55 [http-nio-8080-exec-7] INFO  AspireController:72 - Update-To-Manager Query executed in 34ms
