@@ -170,8 +170,8 @@ public class AspireService {
             if (optionalEmployee.isPresent()) {
                 Employee employee = optionalEmployee.get();
                 
-                // Check if the empId belongs to a manager
-                if ("manager".equalsIgnoreCase(designation)) {
+                // Check if the empId belongs to a manager with subemployees
+                if (designation.equalsIgnoreCase(employee.getDesignation())) {
                     List<Employee> subordinates = employeeRepository.findByManager(employee);
                     if (!subordinates.isEmpty()) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
