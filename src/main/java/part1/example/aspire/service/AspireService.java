@@ -3,6 +3,7 @@ package part1.example.aspire.service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -31,32 +32,35 @@ public class AspireService {
     private StreamRepository streamRepository;
 
     // Retrieve employee(s) whose name start with the specified start letter
-    public ResponseEntity<EmployeeResponseGet> getEmployees(String startLetter) {
-
-        List<Employee> employees = employeeRepository.findByEmpNameStartingWith(startLetter);
+    public ResponseEntity<?> getEmployees(String startLetter) {
+        System.out.println(startLetter);
+        if(startLetter.equals("")){
+            return ResponseEntity.badRequest().body(Map.of("message","Startletter cannot be empty"));
+        }
         List<EmployeeDetailsDTO> employeeDetails = new ArrayList<>();
-    
+        List<Employee> employees = employeeRepository.findByEmpNameStartingWith(startLetter);
+            
         for (Employee employee : employees) {
             EmployeeDetailsDTO employeeDetailsDTO = new EmployeeDetailsDTO();
             employeeDetailsDTO.setEmpName(employee.getEmpName());
             employeeDetailsDTO.setEmpId(employee.getEmpId());
             employeeDetailsDTO.setDesignation(employee.getDesignation());
-    
+        
             if (employee.getAccount() != null) {
                 employeeDetailsDTO.setAccountName(employee.getAccount().getAccountName());
             }
-    
+        
             if (employee.getStream() != null) {
                 employeeDetailsDTO.setStreamName(employee.getStream().getStreamName());
             }
-    
+        
             employeeDetailsDTO.setManagerName(employee.getManager() != null 
                 ? employee.getManager().getEmpName() 
                 : "Self (Manager)"); 
-    
+        
             employeeDetails.add(employeeDetailsDTO);
         }
-    
+        
         if(employeeDetails.isEmpty()){
             EmployeeResponseGet employeeResponseGet = new EmployeeResponseGet("No employee found", employeeDetails);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(employeeResponseGet);
@@ -65,14 +69,13 @@ public class AspireService {
         else{
             EmployeeResponseGet employeeResponseGet = new EmployeeResponseGet("Successfully fetched", employeeDetails);
             return ResponseEntity.ok(employeeResponseGet);
-        }
-        
+        }   
     }
 
     // Retrieve all the streams
     public ResponseEntity<StreamResponseGet> getStream(){
         List<Stream> streams=streamRepository.findAll();
-        
+    
         Set<String> streamSet = new HashSet<>();
         for (Stream stream:streams){
             streamSet.add(stream.getStreamName());
@@ -157,9 +160,12 @@ public class AspireService {
     public ResponseEntity<EmployeeResponseUpdate> updateEmployeeToManager(Integer empId, Integer streamId) {
         Optional<Stream> optionalStream = streamRepository.findById(streamId);
         String designation="Manager";
+
+        // Check if the stream is present or not
         if (optionalStream.isPresent()) {
             Stream stream = optionalStream.get();
-           
+
+           // Check if the manager exist for the stream
             Optional<Employee> existingManager = employeeRepository.findByStream_StreamIdAndDesignation(streamId,designation);
             if (existingManager.isPresent()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -167,6 +173,8 @@ public class AspireService {
             }
     
             Optional<Employee> optionalEmployee = employeeRepository.findById(empId);
+
+            // Check if the employee is present or not
             if (optionalEmployee.isPresent()) {
                 Employee employee = optionalEmployee.get();
                 
@@ -203,30 +211,35 @@ public class AspireService {
     // Update a manager/employee to an employee
     public ResponseEntity<EmployeeResponseUpdate> updateManagerToEmployee(Integer empId, Integer managerId) {
         String designation="Associate";
+
+        // Check if the employee is present or not
         Employee employee = employeeRepository.findById(empId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + empId));
         
-        if (managerId != null ) {
-            Employee manager = employeeRepository.findById(managerId)
-                    .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + managerId));
-            
-            List<Employee> subordinates = employeeRepository.findByManager(employee);
+        // Check if the manager is present or not
+        Employee manager = employeeRepository.findById(managerId)
+            .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + managerId));
+    
+        
+        // Check if the manager(empId of a manager) have sub-employees
+        List<Employee> subordinates = employeeRepository.findByManager(employee);
 
-            if (!subordinates.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new EmployeeResponseUpdate("The employee ID belongs to a manager with subemployees"));
-            }
+        if (!subordinates.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new EmployeeResponseUpdate("The employee ID belongs to a manager with subemployees"));
+        }
+        
+        // Check if the provided managerId belongs to a manager
+        if(manager.getManager()!=null){
+            EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("The manager ID doesn't belongs to a manager");
+            return ResponseEntity.badRequest().body(employeeResponseUpdate);
+        }
 
-            if(manager.getManager()!=null){
-                EmployeeResponseUpdate employeeResponseUpdate=new EmployeeResponseUpdate("The manager ID doesn't belongs to a manager");
-                return ResponseEntity.badRequest().body(employeeResponseUpdate);
-            }
-
-            employee.setManager(manager);
-            employee.setDesignation(designation);
-            employee.setStream(manager.getStream());
-            employee.setAccount(manager.getAccount());
-        } 
+        employee.setManager(manager);
+        employee.setDesignation(designation);
+        employee.setStream(manager.getStream());
+        employee.setAccount(manager.getAccount());   
+        
            
         employeeRepository.save(employee);
         String successMessage = employee.getEmpName() + "'s details have been successfully updated.";

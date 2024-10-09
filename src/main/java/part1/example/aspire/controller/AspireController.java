@@ -1,6 +1,5 @@
 package part1.example.aspire.controller;
 
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import part1.example.aspire.model.EmployeeRequestDTO;
-import part1.example.aspire.model.EmployeeResponseGet;
 import part1.example.aspire.model.EmployeeResponseUpdate;
 import part1.example.aspire.model.StreamResponseGet;
 import part1.example.aspire.service.AspireService;
@@ -40,10 +38,10 @@ public class AspireController {
     }
 
     @GetMapping("/employee-name-start")
-    public ResponseEntity<EmployeeResponseGet> getEmployee(@RequestParam (value = "startletter") String startletter){
+    public ResponseEntity<?> getEmployee(@RequestParam (value = "startletter") String startletter){
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        ResponseEntity<EmployeeResponseGet> employeeResponseGet= aspireService.getEmployees(startletter);
+        ResponseEntity<?> employeeResponseGet= aspireService.getEmployees(startletter);
         stopWatch.stop();
         logger.info("Get-Employee-StartWithLetter Query executed in " + stopWatch.getTotalTimeMillis() + "ms");
 
