@@ -124,32 +124,39 @@ class AspireServiceTest {
         assertEquals("Manager already exists for this stream", response.getBody().getMessage());
     }
 
+    @Test
+    public void testGetEmployees_EmptyStartLetter() {
+        ResponseEntity<?> response = aspireService.getEmployees("");
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Startletter cannot be empty", ((Map<?, ?>) response.getBody()).get("message"));
+    }
+
 
     @Test
-    void testGetEmployees_EmptyList() {
-        String startLetter = "A";
-        when(employeeRepository.findByEmpNameStartingWith(startLetter)).thenReturn(Collections.emptyList());
+    public void testGetEmployees_NoEmployeesFound() {
+        when(employeeRepository.findByEmpNameStartingWith("A")).thenReturn(new ArrayList<>());
 
-        ResponseEntity<EmployeeResponseGet> response = aspireService.getEmployees(startLetter);
-
-        assertEquals("No employee found", response.getBody().getMessage());
-        assertTrue(response.getBody().getEmployeeDetails().isEmpty());
+        ResponseEntity<?> response = aspireService.getEmployees("A");
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("No employee found", ((EmployeeResponseGet) response.getBody()).getMessage());
     }
 
     @Test
-    void testGetEmployees_Success() {
-        String startLetter = "A";
+    public void testGetEmployees_EmployeesFound() {
+        List<Employee> mockEmployees = new ArrayList<>();
         Employee employee = new Employee();
-        employee.setEmpId(1);
         employee.setEmpName("Alice");
+        employee.setEmpId(1);
         employee.setDesignation("Manager");
-        when(employeeRepository.findByEmpNameStartingWith(startLetter)).thenReturn(Collections.singletonList(employee));
+    
+        mockEmployees.add(employee);
+        
+        when(employeeRepository.findByEmpNameStartingWith("A")).thenReturn(mockEmployees);
 
-        ResponseEntity<EmployeeResponseGet> response = aspireService.getEmployees(startLetter);
-
-        assertEquals("Successfully fetched", response.getBody().getMessage());
-        assertEquals(1, response.getBody().getEmployeeDetails().size());
-        assertEquals("Alice", response.getBody().getEmployeeDetails().get(0).getEmpName());
+        ResponseEntity<?> response = aspireService.getEmployees("A");
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Successfully fetched", ((EmployeeResponseGet) response.getBody()).getMessage());
+        assertEquals(1, ((EmployeeResponseGet) response.getBody()).getEmployeeDetails().size());
     }
 
     @Test
